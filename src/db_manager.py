@@ -4,7 +4,6 @@
 import sqlite3
 import os
 import sys
-import subprocess
 import pandas as pd
 from typing import List, Tuple, Dict, Optional
 from contextlib import contextmanager
@@ -39,19 +38,24 @@ class DatabaseManager:
                     f"数据库文件不存在且无法自动生成: {self.db_path}"
                 )
             
-            # 方法1: 直接用 subprocess 执行脚本（最可靠）
-            import subprocess as _sp
-            result = _sp.run(
-                [sys.executable, generate_script],
-                cwd=project_root,
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            if result.returncode != 0:
+            # 切换到项目根目录执行生成脚本
+            old_cwd = os.getcwd()
+            old_path = sys.path.copy()
+            try:
+                os.chdir(project_root)
+                sys.path.insert(0, project_root)
+                with open(generate_script, "r", encoding="utf-8") as f:
+                    code = compile(f.read(), generate_script, "exec")
+                exec(code, {"__name__": "__main__", "__file__": generate_script})
+            except Exception as e:
                 raise RuntimeError(
-                    f"数据库自动生成失败:\n{result.stderr[:500]}"
-                )
+                    f"数据库自动生成失败: {str(e)}\n"
+                    f"脚本路径: {generate_script}"
+                ) from e
+            finally:
+                os.chdir(old_cwd)
+                sys.path = old_path
+            
             if not os.path.exists(self.db_path):
                 raise FileNotFoundError(
                     f"数据库生成后仍找不到文件: {self.db_path}"
