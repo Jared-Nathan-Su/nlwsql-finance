@@ -29,102 +29,52 @@ st.set_page_config(
 # ===================== 样式 =====================
 st.markdown("""
 <style>
-/* ----- 主容器 ----- */
-.stApp { background: #f8fafc; }
-
-/* ----- 标题区 ----- */
-.main-header {
-    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-    color: white;
-    padding: 1.8rem 2rem;
-    border-radius: 12px;
+.main-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f77b4;
+    text-align: center;
+    margin-bottom: 0.2rem;
+}
+.sub-title {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
     margin-bottom: 1.5rem;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(26,115,232,0.25);
 }
-.main-header h1 { font-size: 1.8rem; margin: 0; font-weight: 700; }
-.main-header p { margin: 0.4rem 0 0; opacity: 0.9; font-size: 0.95rem; }
-
-/* ----- KPI 卡片 ----- */
-.kpi-card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 1rem 0.8rem;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    border-top: 3px solid #1a73e8;
-}
-.kpi-card.warn { border-top-color: #c0392b; }
-.kpi-value { font-size: 1.5rem; font-weight: 700; color: #1a73e8; }
-.kpi-card.warn .kpi-value { color: #c0392b; }
-.kpi-label { font-size: 0.78rem; color: #7f8c8d; margin-top: 0.3rem; }
-
-/* ----- SQL 代码框 ----- */
 .sql-box {
-    background: #1e293b;
-    color: #e2e8f0;
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-family: 'Cascadia Code', 'Consolas', monospace;
-    font-size: 0.82rem;
-    line-height: 1.6;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
     overflow-x: auto;
 }
-
-/* ----- AI 分析框 ----- */
 .analysis-box {
-    background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
-    border-left: 4px solid #1a73e8;
+    background-color: #f0f8ff;
+    border-left: 4px solid #1f77b4;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px 0;
+}
+.metric-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 1rem 1.2rem;
-    margin: 1rem 0;
-    font-size: 0.92rem;
-    line-height: 1.7;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
 }
-
-/* ----- 侧边栏 ----- */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f77b4;
 }
-
-/* ----- 按钮 ----- */
-.stButton > button {
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s !important;
+.metric-label {
+    font-size: 0.8rem;
+    color: #888;
 }
-.stButton > button:hover { transform: translateY(-1px); }
-
-/* ----- 输入框 ----- */
-.stTextInput > div > div > input {
-    border-radius: 8px !important;
-    border: 2px solid #e1e8ed !important;
-    padding: 0.6rem 1rem !important;
-    font-size: 0.95rem !important;
-}
-.stTextInput > div > div > input:focus {
-    border-color: #1a73e8 !important;
-    box-shadow: 0 0 0 3px rgba(26,115,232,0.15) !important;
-}
-
-/* ----- Tabs ----- */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 0.5rem;
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 0.3rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.stTabs [data-baseweb="tab"] {
-    border-radius: 8px !important;
-    padding: 0.5rem 1.2rem !important;
-    font-weight: 600 !important;
-}
-
-/* ----- 隐藏默认元素 ----- */
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
-header { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -160,32 +110,25 @@ def init_engine(_api_key: str, _model: str):
 def render_sidebar():
     """渲染侧边栏"""
     with st.sidebar:
-        # Logo 区
-        st.markdown("""
-        <div style="text-align:center; padding:1rem 0 0.5rem;">
-            <span style="font-size:2.5rem;">🏢</span>
-            <h3 style="margin:0.3rem 0; color:#1a73e8;">财务智能问数</h3>
-            <p style="font-size:0.75rem; color:#888; margin:0;">NL2SQL · AI 驱动</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.divider()
+        st.image("https://img.icons8.com/fluency/96/artificial-intelligence.png", width=60)
+        st.markdown("## ⚙️ 系统设置")
         
         # 模型选择
-        st.markdown("#### 🤖 模型设置")
         model_option = st.selectbox(
-            "AI 模型",
+            "🤖 AI 模型",
             options=["deepseek", "qwen", "openai"],
             format_func=lambda x: {
-                "deepseek": "DeepSeek-V3",
+                "deepseek": "DeepSeek-V3 (推荐)",
                 "qwen": "通义千问 Qwen-Max",
                 "openai": "GPT-4o"
             }[x],
             index=0,
         )
         
-        # API Key — 安全机制：不预填实际值，仅显示脱敏提示
+        # API Key — 优先级: 侧边栏 > Streamlit Secrets > 环境变量
         env_map = {"deepseek": "DEEPSEEK_API_KEY", "qwen": "DASHSCOPE_API_KEY", "openai": "OPENAI_API_KEY"}
         env_key = os.environ.get(env_map.get(model_option, ""), "")
+        # 也尝试从 Streamlit Secrets 读取
         try:
             secret_key = st.secrets.get(env_map.get(model_option, ""), "")
             if secret_key and not env_key:
@@ -193,60 +136,55 @@ def render_sidebar():
         except Exception:
             pass
         
-        # 密码输入框，始终为空初始值（不泄露Key）
         api_key = st.text_input(
-            "API Key",
+            "🔑 API Key",
             type="password",
-            value="",
-            placeholder="已自动注入，无需填写" if env_key else "请输入 API Key",
-            help="密钥通过环境变量/Secrets注入，不会明文展示。获取: platform.deepseek.com"
+            value=env_key if env_key else "",
+            placeholder="请输入API Key...（已自动读取）" if env_key else "请输入API Key...",
+            help="DeepSeek: https://platform.deepseek.com\n千问: https://dashscope.aliyun.com\nOpenAI: https://platform.openai.com"
         )
-        # 用户手动填写的优先，否则用环境变量
-        effective_key = api_key if api_key else env_key
-        if effective_key:
-            masked = effective_key[:6] + "****" + effective_key[-4:]
-            st.caption(f"🔒 已注入: `{masked}`")
-        else:
-            st.caption("⚠️ 未配置 API Key")
         
         st.divider()
         
         # 系统状态
-        st.markdown("#### 📊 数据状态")
+        st.markdown("### 📊 系统状态")
         try:
             db = init_db()
             schema = db.get_schema_info()
             total_rows = sum(info["row_count"] for info in schema.values())
+            
             col1, col2 = st.columns(2)
             with col1:
                 st.metric("数据表", f"{len(schema)}张")
             with col2:
                 st.metric("总记录", f"{total_rows:,}行")
-            if effective_key:
-                st.success("🟢 系统就绪")
+            
+            if api_key or env_key:
+                st.success("✅ API Key 已配置")
             else:
-                st.warning("🟡 等待 API Key")
+                st.warning("⚠️ 请配置 API Key")
         except Exception as e:
             st.error(f"数据库连接失败: {e}")
         
         st.divider()
         
         # 历史记录
-        st.markdown("#### 📜 查询历史")
+        st.markdown("### 📜 查询历史")
         if "history" in st.session_state and st.session_state.history:
-            for i, h in enumerate(reversed(st.session_state.history[-6:])):
-                with st.expander(f"{h['question'][:28]}...", expanded=False):
+            for i, h in enumerate(reversed(st.session_state.history[-10:])):
+                with st.expander(f"Q: {h['question'][:30]}...", expanded=False):
                     st.caption(f"⏱️ {h.get('elapsed_ms', '?')}ms | 📊 {h.get('rows', '?')}行")
                     if st.button(f"🔄 重新查询", key=f"replay_{i}"):
-                        st.session_state.question_input = h["question"]
+                        st.session_state.current_question = h["question"]
                         st.rerun()
         else:
             st.caption("暂无查询记录")
         
         st.divider()
-        st.caption(f"© 2026 NL2SQL · 经营分析赛道")
+        st.caption(f"© 2026 NL2SQL 财务智能问数系统")
+        st.caption(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     
-    return model_option, effective_key
+    return model_option, api_key
 
 # ===================== 图表自动选择 =====================
 def auto_chart(df: pd.DataFrame):
@@ -326,33 +264,32 @@ def render_kpi_cards(db):
     cols = st.columns(5)
     
     metrics = [
-        ("💰 总营收(2024)", f"¥{kpis.get('total_revenue_2024', 0):,.0f}", False),
-        ("📈 毛利率", f"{kpis.get('gross_margin_pct', 0):.1f}%", False),
-        ("💵 预算执行率", f"{kpis.get('budget_execution_pct', 0):.1f}%", False),
-        ("🧾 回款率", f"{kpis.get('collection_rate_pct', 0):.1f}%", False),
-        ("⚠️ 逾期应收", f"¥{kpis.get('overdue_receivable', 0):,.0f}", True),
+        ("💰 总营收(2024)", f"¥{kpis.get('total_revenue_2024', 0):,.0f}", None),
+        ("📈 毛利率", f"{kpis.get('gross_margin_pct', 0):.1f}%", "delta"),
+        ("💵 预算执行率", f"{kpis.get('budget_execution_pct', 0):.1f}%", None),
+        ("🧾 回款率", f"{kpis.get('collection_rate_pct', 0):.1f}%", None),
+        ("⚠️ 逾期应收", f"¥{kpis.get('overdue_receivable', 0):,.0f}", "inverse"),
     ]
     
-    for i, (label, value, warn) in enumerate(metrics):
+    for i, (label, value, flag) in enumerate(metrics):
         with cols[i]:
-            cls = "kpi-card warn" if warn else "kpi-card"
+            color = "#e74c3c" if flag == "inverse" else "#1f77b4"
             st.markdown(f"""
-            <div class="{cls}">
-                <div class="kpi-value">{value}</div>
-                <div class="kpi-label">{label}</div>
+            <div class="metric-card">
+                <div class="metric-label">{label}</div>
+                <div class="metric-value" style="color:{color}">{value}</div>
             </div>
             """, unsafe_allow_html=True)
 
 # ===================== 主页面 =====================
 def main():
     # 标题
-    st.markdown("""
-    <div class="main-header">
-        <h1>🏢 企业财务智能问数与经营分析系统</h1>
-        <p>基于大模型的 NL2SQL 财务助手 · 自然语言问数 · 秒级响应 · AI 自动解读</p>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown('<div class="main-title">🏢 企业财务智能问数与经营分析系统</div>', 
+                unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">基于大模型的 NL2SQL 财务助手 — 自然语言问数，秒级响应</div>',
+                unsafe_allow_html=True)
+    
+    # 侧边栏
     model_option, api_key = render_sidebar()
     
     # 初始化数据库（首次启动自动生成模拟数据，需等待数秒）
@@ -477,33 +414,41 @@ def main():
     
     # ==================== Tab3: 使用帮助 ====================
     with tab3:
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("""
-            ### 🎯 系统简介
-            基于**大语言模型**实现自然语言 → SQL → 数据 → 分析的全链路自动化。
-            
-            ### 💡 提问技巧
-            | ✅ 好的提问 | ❌ 不好的提问 |
-            |---|---|
-            | 2024年Q2华东区毛利率 | 毛利率 |
-            | 各产品线年度营收排名 | 看看数据 |
-            | 预算执行率低于80%的部门 | 预算怎么样 |
-            """)
-        with c2:
-            st.markdown("""
-            ### 🔧 技术栈
-            - **LLM**: DeepSeek-V3 / Qwen / GPT
-            - **数据库**: SQLite (星型模型 6维+5事实)
-            - **前端**: Streamlit + Plotly
-            - **安全**: SQL校验 + 仅SELECT
-            
-            ### 📊 数据范围
-            - 时间: 2022-2024 (3年)
-            - 区域: 华东/华南/华北/西南
-            - 产品: 12条产品线 · 50个客户
-            - 规模: 59,720 条记录
-            """)
+        st.markdown("""
+        ### 📖 使用指南
+        
+        #### 🎯 系统简介
+        本系统基于大模型（LLM）实现 **自然语言 → SQL → 数据查询 → AI分析** 的全链路自动化，
+        让非技术人员也能通过日常语言自助查询企业财务经营数据。
+        
+        #### 💡 如何提问？
+        
+        | 提问技巧 | 好的示例 ✅ | 不好的示例 ❌ |
+        |----------|------------|-------------|
+        | 明确时间范围 | "2024年Q2华东区毛利率" | "毛利率"（时间不明确） |
+        | 指明分析维度 | "各产品线年度营收排名" | "看看数据"（维度不明确） |
+        | 使用财务术语 | "应收账款周转天数" | "客户欠钱多久还" |
+        | 具体指标 | "预算执行率低于80%的部门" | "预算怎么样" |
+        
+        #### 🔧 技术架构
+        - **NL2SQL引擎**: LangChain + LLM（DeepSeek/Qwen/GPT）
+        - **数据库**: SQLite（星型模型，6维5事实）
+        - **前端**: Streamlit + Plotly
+        - **数据**: 3年模拟企业经营数据（10万+行）
+        
+        #### ⚠️ 注意事项
+        - 仅支持查询（SELECT），不支持数据修改
+        - 复杂问题建议拆分为多个简单问题
+        - SQL生成准确率约 85%+，如结果不对请换种问法
+        - API Key 仅用于调用大模型，不会上传您的数据
+        
+        #### 📊 数据范围
+        - 时间: 2022年1月 - 2024年12月
+        - 区域: 华东/华南/华北/西南
+        - 产品: 12个产品线（硬件/软件/服务）
+        - 部门: 8个部门
+        - 客户: 50个
+        """)
 
 # ===================== 查询处理 =====================
 def process_query(question: str, model_option: str, api_key: str):
@@ -554,7 +499,11 @@ def process_query(question: str, model_option: str, api_key: str):
     
     # SQL展示区
     with st.expander("📝 查看生成的 SQL", expanded=False):
-        st.code(result["sql"], language="sql", line_numbers=False)
+        st.markdown(f'<div class="sql-box">{result["sql"]}</div>', unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 10])
+        with col1:
+            if st.button("📋", key="copy_sql", help="复制SQL"):
+                st.toast("SQL 已复制!")
     
     # 数据表格
     st.markdown("### 📋 查询结果")
