@@ -338,6 +338,7 @@ def main():
                     for q in questions:
                         if st.button(q, key=f"quick_{cat}_{q[:10]}", use_container_width=True):
                             st.session_state.question_input = q
+                            st.session_state.auto_search = True
                             st.rerun()
         
         # 随机示例按钮
@@ -345,13 +346,13 @@ def main():
             import random
             random_q = random.choice(SAMPLE_QUESTIONS)
             st.session_state.question_input = random_q
+            st.session_state.auto_search = True
             st.rerun()
         
         # 处理查询
-        if btn_search and question:
+        if (btn_search and question) or st.session_state.get("auto_search", False):
+            st.session_state.auto_search = False
             process_query(question, model_option, api_key)
-        elif question and "current_question" in st.session_state:
-            process_query(st.session_state.current_question, model_option, api_key)
     
     # ==================== Tab2: 经营看板 ====================
     with tab2:
