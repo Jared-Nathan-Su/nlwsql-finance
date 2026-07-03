@@ -1,0 +1,19 @@
+# NL2SQL 财务智能问数系统 - Python 依赖
+# 安装方式: pip install -r requirements.txt
+
+# ===== 核心依赖 =====
+streamlit>=1.28.0          # Web前端框架
+pandas>=2.0.0              # 数据处理
+numpy>=1.24.0              # 数值计算
+openai>=1.6.0              # 大模型API调用（兼容DeepSeek/千问/GPT）
+
+# ===== SQL相关 =====
+sqlparse>=0.4.4            # SQL语法解析与校验
+
+# ===== 可视化 =====
+plotly>=5.17.0             # 交互式图表
+
+# ===== 可选依赖 =====
+# langchain>=0.1.0         # LLM框架（可选，增强Prompt管理）
+# pymysql>=1.1.0           # MySQL连接（生产环境）
+# psycopg2-binary>=2.9.9   # PostgreSQL连接（生产环境）
