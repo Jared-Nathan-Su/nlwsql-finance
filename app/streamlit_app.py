@@ -540,8 +540,7 @@ def process_query(question: str, model_option: str, api_key: str):
     # AI分析解读
     if result.get("analysis"):
         st.markdown("### 🤖 AI 经营分析解读")
-        st.markdown(f'<div class="analysis-box">{result["analysis"]}</div>', 
-                   unsafe_allow_html=True)
+        st.markdown(result["analysis"])
     
     st.divider()
 

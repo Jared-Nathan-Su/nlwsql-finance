@@ -273,14 +273,6 @@ class NL2SQLEngine:
     def analyze_result(self, question: str, sql: str, df: pd.DataFrame) -> str:
         """
         对查询结果进行AI分析解读
-        
-        Args:
-            question: 用户原问题
-            sql: 执行的SQL
-            df: 查询结果DataFrame
-        
-        Returns:
-            AI分析文本
         """
         # 格式化结果为文本
         if len(df) > 20:
@@ -289,12 +281,20 @@ class NL2SQLEngine:
         else:
             result_text = df.to_string(index=False)
         
-        # 截断过长结果
-        if len(result_text) > 2000:
-            result_text = result_text[:2000] + "\n... (结果已截断)"
+        # 截断过长结果（给分析留足够token）
+        if len(result_text) > 1500:
+            result_text = result_text[:1500] + "\n... (结果已截断)"
         
         prompt = build_analysis_prompt(question, sql, result_text)
         analysis = self._call_llm(prompt, temperature=0.5)
+        
+        # 清理 markdown 代码块标记
+        if analysis and not analysis.startswith("ERROR:"):
+            analysis = analysis.replace("```markdown", "").replace("```", "").strip()
+        
+        # 如果分析为空或失败，返回简单摘要
+        if not analysis or analysis.startswith("ERROR:"):
+            analysis = f"查询完成，共返回 {len(df)} 条记录。"
         
         return analysis
     
