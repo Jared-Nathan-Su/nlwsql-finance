@@ -18,8 +18,8 @@ env/
 *.swp
 *.swo
 
-# Database (large binary, regenerate with script)
-data/finance.db
+# Database (auto-generated, but included for Streamlit Cloud compatibility)
+# data/finance.db
 
 # OS files
 .DS_Store
