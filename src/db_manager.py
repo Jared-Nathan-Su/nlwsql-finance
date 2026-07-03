@@ -31,21 +31,30 @@ class DatabaseManager:
     def _verify_db(self):
         """验证数据库文件是否存在，不存在则自动生成"""
         if not os.path.exists(self.db_path):
-            # 自动生成数据库
-            project_root = os.path.dirname(os.path.dirname(__file__))
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             generate_script = os.path.join(project_root, "data", "generate_data.py")
             
-            if os.path.exists(generate_script):
-                import importlib.util
-                spec = importlib.util.spec_from_file_location("generate_data", generate_script)
-                module = importlib.util.module_from_spec(spec)
-                sys.modules["generate_data"] = module
-                spec.loader.exec_module(module)
-                module.main()
-            else:
+            if not os.path.exists(generate_script):
                 raise FileNotFoundError(
-                    f"数据库文件不存在: {self.db_path}\n"
-                    f"请先运行: python data/generate_data.py"
+                    f"数据库文件不存在且无法自动生成: {self.db_path}"
+                )
+            
+            # 方法1: 直接用 subprocess 执行脚本（最可靠）
+            import subprocess as _sp
+            result = _sp.run(
+                [sys.executable, generate_script],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"数据库自动生成失败:\n{result.stderr[:500]}"
+                )
+            if not os.path.exists(self.db_path):
+                raise FileNotFoundError(
+                    f"数据库生成后仍找不到文件: {self.db_path}"
                 )
     
     @contextmanager
