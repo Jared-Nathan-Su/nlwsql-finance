@@ -3,6 +3,8 @@
 """
 import sqlite3
 import os
+import sys
+import subprocess
 import pandas as pd
 from typing import List, Tuple, Dict, Optional
 from contextlib import contextmanager
@@ -23,16 +25,28 @@ class DatabaseManager:
                 os.path.dirname(os.path.dirname(__file__)),
                 "data", "finance.db"
             )
-        self.db_path = db_path
+        self.db_path = os.path.abspath(db_path)
         self._verify_db()
     
     def _verify_db(self):
-        """验证数据库文件是否存在"""
+        """验证数据库文件是否存在，不存在则自动生成"""
         if not os.path.exists(self.db_path):
-            raise FileNotFoundError(
-                f"数据库文件不存在: {self.db_path}\n"
-                f"请先运行: python data/generate_data.py"
-            )
+            # 自动生成数据库
+            project_root = os.path.dirname(os.path.dirname(__file__))
+            generate_script = os.path.join(project_root, "data", "generate_data.py")
+            
+            if os.path.exists(generate_script):
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("generate_data", generate_script)
+                module = importlib.util.module_from_spec(spec)
+                sys.modules["generate_data"] = module
+                spec.loader.exec_module(module)
+                module.main()
+            else:
+                raise FileNotFoundError(
+                    f"数据库文件不存在: {self.db_path}\n"
+                    f"请先运行: python data/generate_data.py"
+                )
     
     @contextmanager
     def get_connection(self):

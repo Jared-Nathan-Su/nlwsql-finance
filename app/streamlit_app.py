@@ -292,13 +292,15 @@ def main():
     # 侧边栏
     model_option, api_key = render_sidebar()
     
-    # 初始化数据库
-    try:
+    # 初始化数据库（首次启动自动生成模拟数据，需等待数秒）
+    import os as _os
+    db_file = _os.path.join(_os.path.dirname(_os.path.dirname(__file__)), "data", "finance.db")
+    if not _os.path.exists(db_file):
+        with st.spinner("🔧 首次启动，正在生成模拟财务数据（约10秒）..."):
+            db = init_db()
+        st.success("✅ 数据生成完成！")
+    else:
         db = init_db()
-    except Exception as e:
-        st.error(f"❌ 数据库初始化失败: {e}")
-        st.info("请先运行数据生成脚本: `python data/generate_data.py`")
-        st.stop()
     
     # 主区域 Tabs
     tab1, tab2, tab3 = st.tabs(["💬 智能问数", "📊 经营看板", "📖 使用帮助"])
