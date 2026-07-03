@@ -308,10 +308,14 @@ def main():
     # ==================== Tab1: 智能问数 ====================
     with tab1:
         # 输入区域 - 使用 columns + button，通过 on_click 回调触发
+        # 检查是否有待处理的快捷问题
+        pending_q = st.session_state.get("pending_query", "")
+        
         col1, col2, col3 = st.columns([6, 1, 1])
         with col1:
             question = st.text_input(
                 "问题",
+                value=pending_q,
                 placeholder="请输入您的财务问题，例如：华东区Q2毛利率同比变化？",
                 key="question_input",
                 label_visibility="collapsed",
@@ -337,20 +341,21 @@ def main():
                 with st.popover(cat, use_container_width=True):
                     for q in questions:
                         if st.button(q, key=f"quick_{cat}_{q[:10]}", use_container_width=True):
-                            st.session_state.question_input = q
+                            st.session_state.pending_query = q
                             st.session_state.auto_search = True
                             st.rerun()
         
         # 随机示例按钮
         if btn_random:
             import random
-            random_q = random.choice(SAMPLE_QUESTIONS)
-            st.session_state.question_input = random_q
+            st.session_state.pending_query = random.choice(SAMPLE_QUESTIONS)
             st.session_state.auto_search = True
             st.rerun()
         
-        # 处理查询
+        # 处理查询后清除 pending
         if (btn_search and question) or st.session_state.get("auto_search", False):
+            # 清除 pending 和 auto_search
+            st.session_state.pending_query = ""
             st.session_state.auto_search = False
             process_query(question, model_option, api_key)
     
