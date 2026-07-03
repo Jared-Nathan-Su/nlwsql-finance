@@ -354,10 +354,10 @@ def main():
         
         # 处理查询后清除 pending
         if (btn_search and question) or st.session_state.get("auto_search", False):
-            # 清除 pending 和 auto_search
+            query_text = question if question else pending_q
             st.session_state.pending_query = ""
             st.session_state.auto_search = False
-            process_query(question, model_option, api_key)
+            process_query(query_text, model_option, api_key)
     
     # ==================== Tab2: 经营看板 ====================
     with tab2:
