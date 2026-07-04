@@ -118,7 +118,7 @@ def render_sidebar():
             "🤖 AI 模型",
             options=["deepseek", "qwen", "openai"],
             format_func=lambda x: {
-                "deepseek": "DeepSeek-V3 (推荐)",
+                "deepseek": "DeepSeek-V4 (推荐)",
                 "qwen": "通义千问 Qwen-Max",
                 "openai": "GPT-4o"
             }[x],

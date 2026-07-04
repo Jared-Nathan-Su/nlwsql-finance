@@ -31,7 +31,7 @@ class NL2SQLEngine:
     # 支持的模型配置
     MODEL_CONFIGS = {
         "deepseek": {
-            "name": "DeepSeek-V3",
+            "name": "DeepSeek-V4",
             "base_url": "https://api.deepseek.com",
             "model": "deepseek-chat",
             "api_key_env": "DEEPSEEK_API_KEY",
