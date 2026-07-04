@@ -149,6 +149,54 @@ class DatabaseManager:
         with self.get_connection() as conn:
             return pd.read_sql_query(f"SELECT * FROM '{table}' LIMIT {limit}", conn)
     
+    def import_dataframe(self, df: pd.DataFrame, table_name: str) -> Tuple[bool, str]:
+        """
+        导入 DataFrame 到新表（如果表已存在则替换）
+        """
+        try:
+            with self.get_connection() as conn:
+                df.to_sql(table_name, conn, if_exists="replace", index=False)
+            return True, f"成功导入 {len(df)} 行到表 '{table_name}'"
+        except Exception as e:
+            return False, str(e)
+    
+    def import_csv(self, file_path: str, table_name: str) -> Tuple[bool, str, pd.DataFrame]:
+        """导入 CSV 文件到数据库"""
+        try:
+            df = pd.read_csv(file_path)
+            ok, msg = self.import_dataframe(df, table_name)
+            return ok, msg, df
+        except Exception as e:
+            return False, str(e), pd.DataFrame()
+    
+    def get_table_schema_text(self, table_name: str) -> str:
+        """获取单表的 Schema 文本描述"""
+        schema = self.get_schema_info()
+        if table_name not in schema:
+            return ""
+        info = schema[table_name]
+        cols = info["columns"]
+        lines = [f"表名: {table_name} ({info['row_count']} 行)"]
+        lines.append("字段:")
+        for c in cols:
+            pk_flag = " (主键)" if c["pk"] else ""
+            lines.append(f"  - {c['name']} ({c['type']}){pk_flag}")
+        return "\n".join(lines)
+    
+    def generate_schema_context(self, tables: List[str] = None) -> str:
+        """生成所有表（或指定表）的 Schema 上下文文本"""
+        schema = self.get_schema_info()
+        if tables is None:
+            tables = list(schema.keys())
+        lines = ["## 数据库 Schema"]
+        for t in tables:
+            if t in schema:
+                info = schema[t]
+                cols = [f"{c['name']}({c['type']})" for c in info["columns"]]
+                lines.append(f"\n**{t}** ({info['row_count']} 行)")
+                lines.append(f"字段: {', '.join(cols)}")
+        return "\n".join(lines)
+    
     def print_schema_summary(self) -> str:
         """打印Schema摘要"""
         schema = self.get_schema_info()

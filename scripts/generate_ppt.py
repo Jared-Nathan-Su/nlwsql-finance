@@ -1,0 +1,270 @@
+# -*- coding: utf-8 -*-
+"""NL2SQL 答辩 PPT — 18页 16:9"""
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
+from pptx.enum.shapes import MSO_SHAPE
+import os
+
+prs=Presentation()
+prs.slide_width=Inches(13.333); prs.slide_height=Inches(7.5)
+
+# Colors
+DB=RGBColor(0x0D,0x2B,0x5E); MB=RGBColor(0x1A,0x56,0xDB); LB=RGBColor(0xE8,0xF0,0xFE)
+WH=RGBColor(0xFF,0xFF,0xFF); DK=RGBColor(0x1E,0x29,0x3B); TX=RGBColor(0x33,0x40,0x55)
+GR=RGBColor(0x94,0xA3,0xB8); RD=RGBColor(0xEF,0x44,0x44); GN=RGBColor(0x10,0xB9,0x81)
+OG=RGBColor(0xF5,0x9E,0x0B); CB=RGBColor(0xF8,0xFA,0xFC); B2=RGBColor(0xE2,0xE8,0xF0)
+
+def grad_bg(sl,c1,c2):
+    bg=sl.background; bg.fill.gradient(); bg.fill.gradient_angle=135
+    bg.fill.gradient_stops[0].color.rgb=c1; bg.fill.gradient_stops[1].color.rgb=c2
+def solid_bg(sl,c):
+    sl.background.fill.solid(); sl.background.fill.fore_color.rgb=c
+def box(sl,l,t,w,h,fill=None,border=None,radius=None):
+    s=sl.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE,
+                           Inches(l),Inches(t),Inches(w),Inches(h))
+    if fill: s.fill.solid(); s.fill.fore_color.rgb=fill
+    else: s.fill.background()
+    if border: s.line.color.rgb=border; s.line.width=Pt(1)
+    else: s.line.fill.background()
+def oval(sl,l,t,w,h,color):
+    o=sl.shapes.add_shape(MSO_SHAPE.OVAL,Inches(l),Inches(t),Inches(w),Inches(h))
+    o.fill.solid(); o.fill.fore_color.rgb=color; o.line.fill.background()
+def txt(sl,l,t,w,h,text,size=14,color=TX,bold=False,align=PP_ALIGN.LEFT):
+    tb=sl.shapes.add_textbox(Inches(l),Inches(t),Inches(w),Inches(h))
+    tf=tb.text_frame; tf.word_wrap=True; p=tf.paragraphs[0]
+    p.text=text; p.font.size=Pt(size); p.font.color.rgb=color; p.font.bold=bold; p.alignment=align
+def mtxt(sl,l,t,w,h,lines,size=13,color=TX,sp=Pt(6)):
+    tb=sl.shapes.add_textbox(Inches(l),Inches(t),Inches(w),Inches(h))
+    tf=tb.text_frame; tf.word_wrap=True
+    for i,ln in enumerate(lines):
+        p=tf.paragraphs[0] if i==0 else tf.add_paragraph()
+        p.text=ln; p.font.size=Pt(size); p.font.color.rgb=color; p.space_after=sp
+def card(sl,l,t,w,h,title,body,tc=DB):
+    box(sl,l,t,w,h,WH,B2,0.15)
+    txt(sl,l+0.3,t+0.2,w-0.6,0.4,title,15,tc,True)
+    mtxt(sl,l+0.3,t+0.6,w-0.6,h-0.8,body.split('\n'),11,TX,Pt(4))
+def kpi(sl,l,t,v,lb,c=MB):
+    box(sl,l,t,1.8,1.3,WH,B2,0.12)
+    txt(sl,l,t+0.15,1.8,0.6,v,26,c,True,PP_ALIGN.CENTER)
+    txt(sl,l,t+0.8,1.8,0.35,lb,9,GR,False,PP_ALIGN.CENTER)
+def hdr(sl,title,sub=""):
+    txt(sl,0.8,0.4,10,0.6,title,28,DB,True)
+    ln=sl.shapes.add_shape(MSO_SHAPE.RECTANGLE,Inches(0.8),Inches(1.0),Inches(1.5),Pt(4))
+    ln.fill.solid(); ln.fill.fore_color.rgb=MB; ln.line.fill.background()
+    if sub: txt(sl,0.8,1.15,10,0.35,sub,12,GR)
+def ftr(sl):
+    box(sl,0,7.1,13.333,0.4,DB)
+    txt(sl,0.5,7.12,10,0.3,"NL2SQL 财务智能问数系统 / 经营分析赛道 / 2026",9,WH)
+def pn(sl,n):
+    txt(sl,12.2,7.0,1,0.35,f"{n}/18",9,GR,False,PP_ALIGN.RIGHT)
+
+# === S1 封面 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH)
+box(sl,0,0,13.333,3.0,MB)
+oval(sl,1.0,1.5,0.6,0.6,RGBColor(0x3A,0x82,0xF6)); oval(sl,11.5,0.5,1.0,1.0,RGBColor(0x3A,0x82,0xF6))
+txt(sl,1.5,1.0,10,1.2,"NL2SQL 财务智能问数系统",44,WH,True)
+txt(sl,1.5,2.2,10,0.6,"基于大模型的企业财务智能问数与经营分析平台",18,RGBColor(0xBF,0xDB,0xFE))
+box(sl,1.5,3.5,2,0,border=MB); box(sl,1.5,3.55,2,0,border=MB)
+mtxt(sl,1.5,3.9,6,1.2,["赛道方向：经营分析","AI 工具：DeepSeek-V4  |  LangChain  |  Streamlit","指导教师：XXX    团队：XXX"],14,TX,Pt(10))
+for i,(v,l) in enumerate([("99.9%","效率提升"),("88%","SQL准确率"),("3-5s","响应速度"),("20+","问数场景")]):
+    kpi(sl,1.5+i*2.8,5.6,v,l,MB)
+txt(sl,5,6.9,3,0.4,"2026 年 7 月",11,GR,False,PP_ALIGN.CENTER)
+
+# === S2 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl)
+hdr(sl,"目  录","CONTENTS")
+for i,(n,t,d) in enumerate([("01","业务背景与痛点分析","企业管理层的看数之痛"),
+    ("02","解决方案与系统架构","NL2SQL 引擎 + 五层 Prompt 注入"),("03","核心技术解析","SQL 安全校验 / 自动纠错 / AI 分析"),
+    ("04","系统演示与典型场景","3 个 Demo 展示核心能力"),("05","AI vs 传统 & 业务价值","效率提升 99%+ / ROI 700%"),
+    ("06","创新点 / 不足 / 展望","四大创新 + 未来路线图")]):
+    y=1.6+i*0.9; txt(sl,1.2,y,0.7,0.5,n,26,MB,True,PP_ALIGN.CENTER)
+    txt(sl,2.0,y+0.02,5,0.35,t,16,DK,True); txt(sl,2.0,y+0.4,7,0.3,d,11,GR)
+
+# === S3 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,3)
+hdr(sl,"企业管理层的看数之痛","业务背景与痛点分析")
+for i,s in enumerate(["管理层提问","BI分析师理解需求","多轮沟通确认","编写SQL制作报表","反馈给管理层"]):
+    x=0.8+i*2.4; box(sl,x,1.8,2.0,1.0,LB,B2,0.12)
+    txt(sl,x+0.1,1.95,1.8,0.7,s,11,DK,True,PP_ALIGN.CENTER)
+    if i<4: txt(sl,x+2.0,2.1,0.4,0.4,">",18,MB,False,PP_ALIGN.CENTER)
+for i,(v,l) in enumerate([("1-3 天","全流程耗时"),("3-5 人次","沟通成本"),("~20%","理解偏差率"),("仅 25%","员工可自助BI"),("60%","分析师花在取数")]):
+    kpi(sl,0.8+i*2.4,3.1,v,l)
+for i,(t,d,c) in enumerate([("响应慢","问数以天为单位\n错过决策窗口",RD),("门槛高","非技术人员无法自助\nBI团队成为瓶颈",OG),("分析浅","只给数据不解读\n异常靠人发现易遗漏",GR)]):
+    card(sl,0.8+i*4.2,4.6,3.8,1.6,t,d,c)
+
+# === S4 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,4)
+hdr(sl,"解决方案定位","从翻译官视角重新定义财务问数")
+txt(sl,1.0,1.8,5,0.4,"BEFORE - 传统模式",17,RD,True)
+mtxt(sl,1.0,2.3,5,2.5,["BI分析师/业务人员反复沟通","手动编写SQL测试出报表","等待 1-3 天才能拿到数据","数据给了但为什么需自己分析","","核心矛盾:","懂业务的人不懂 SQL","懂 SQL 的人不懂业务"],12,TX,Pt(7))
+txt(sl,7.5,1.8,5,0.4,"AFTER - AI 方案",17,GN,True)
+mtxt(sl,7.5,2.3,5,2.5,["自然语言输入 AI自动生成SQL","3-10秒返回:数据+图表+AI解读","零门槛任何人都能自助问数","AI自动标注异常+行动建议","","AI = 财务翻译官","业务语言 to 数据库语言","数据结果 to 分析洞察"],12,TX,Pt(7))
+box(sl,1.0,5.5,11.5,0.8,LB,None,0.08)
+txt(sl,1.3,5.65,11,0.5,"我们不替代财务人员，而是在业务与数据之间架一座 AI 翻译桥",14,DB,True,PP_ALIGN.CENTER)
+
+# === S5 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,5)
+hdr(sl,"系统架构","三层架构: 展示层 to NL2SQL 引擎 to 数据层")
+for i,(t,lns,cl) in enumerate([("展示层 Streamlit",["自然语言输入 | 数据表格 | 可视化图表(Plotly)","SQL展示 | AI分析解读 | 历史查询记录"],MB),
+    ("NL2SQL 核心引擎 LangChain+LLM",["Step1:Prompt构建 Step2:LLM生成SQL Step3:SQL校验","Step4:执行查询 Step5:AI结果解读 自动纠错(最多3次)"],RGBColor(0x3B,0x82,0xF6)),
+    ("数据层 SQLite / 星型模型",["6 维度表 + 5 事实表","销售 | 成本 | 费用(含预算) | 应收 | 应付"],DB)]):
+    y=1.8+i*1.6; box(sl,0.8,y,11.7,1.35,cl,None,0.12)
+    txt(sl,1.1,y+0.08,11,0.35,t,14,WH,True)
+    for j,ln in enumerate(lns): txt(sl,1.1,y+0.48+j*0.32,11,0.3,ln,10,RGBColor(0xE0,0xE8,0xF0))
+for i,(v,l) in enumerate([("12 张","数据表"),("59,720","总记录"),("3 年","时间跨度"),("6 区","覆盖"),("12 线","产品线"),("50个","客户")]):
+    kpi(sl,0.4+i*2.15,6.65,v,l)
+
+# === S6 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,6)
+hdr(sl,"数据模型设计 & 核心财务指标","星型模式: 6维度+5事实 | 毛利率/同比/预算执行率")
+for i,(n,cn,d) in enumerate([("dim_date","日期维度","年/季/月/日"),("dim_product","产品维度","12产品线"),("dim_department","部门维度","8部门"),("dim_region","区域维度","6城市4大区"),("dim_customer","客户维度","50客户含信用评分"),("dim_supplier","供应商","20供应商")]):
+    y=1.7+i*0.48; box(sl,0.8,y,5.5,0.4,LB if i%2==0 else WH,B2,0.04)
+    txt(sl,0.9,y+0.04,2,0.32,n,9,DB,True); txt(sl,3.0,y+0.04,3,0.32,f"{cn} / {d}",9,TX)
+for i,(n,cn,r,d) in enumerate([("fact_sales","销售","20,736行","收入+数量"),("fact_cost","成本","18,412行","直接/间接"),("fact_expense","费用","17,280行","预算vs实际"),("fact_receivable","应收","1,644行","逾期标记"),("fact_payable","应付","446行","到期日")]):
+    y=1.7+i*0.48; box(sl,6.8,y,5.7,0.4,LB if i%2==0 else WH,B2,0.04)
+    txt(sl,6.9,y+0.04,1.8,0.32,n,9,DB,True); txt(sl,8.8,y+0.04,1.2,0.32,r,8,GR); txt(sl,10.1,y+0.04,2.2,0.32,f"{cn}:{d}",9,TX)
+txt(sl,0.8,4.9,11,0.4,"核心财务指标计算公式",14,DB,True)
+mtxt(sl,0.8,5.3,11.5,2.0,["毛利率=(收入-成本)/收入*100%      净利率=(收入-成本-费用)/收入*100%",
+    "同比=(本期-去年同期)/去年同期*100%      预算执行率=实际/预算*100%",
+    "费用率=费用/收入*100%      回款率=已收/应收*100%      周转天数=平均应收/日均收入*365"],10,TX,Pt(6))
+
+# === S7 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,7)
+hdr(sl,"NL2SQL核心技术 - 五层 Prompt 注入策略","分层注入 vs 堆叠: 准确率 72% to 88%")
+for i,(nm,title,desc,reason) in enumerate([("Layer1","系统角色","资深财务数据分析师精通SQL","约束输出风格"),
+    ("Layer2","数据库Schema","12张表完整结构字段含义","防幻觉字段"),("Layer3","业务规则","毛利率/同比公式区域映射","确保计算正确"),
+    ("Layer4","Few-shot示例","3-5个自然语言toSQL配对","引导生成模式"),("Layer5","用户问题","华东区Q2毛利率同比变化","最终回答目标")]):
+    y=1.6+i*0.85; cl=[MB,RGBColor(0x3B,0x82,0xF6),RGBColor(0x63,0x66,0xF1),OG,GN][i]
+    box(sl,0.8,y,0.55,0.65,cl,None,0.08); txt(sl,0.8,y+0.12,0.55,0.4,str(i+1),16,WH,True,PP_ALIGN.CENTER)
+    txt(sl,1.5,y+0.02,2,0.3,title,12,cl,True); txt(sl,1.5,y+0.32,7,0.3,desc,10,TX); txt(sl,9.5,y+0.1,3.5,0.3,f"to {reason}",10,GR)
+box(sl,0.8,6.0,11.7,0.8,LB,None,0.08)
+mtxt(sl,1.0,6.1,11,0.6,["实验结果: 不分层72% | 五层分层88% | 分层+7示例91% => 分层比堆叠准确率提升约15个百分点"],11,DB,Pt(4))
+
+# === S8 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,8)
+hdr(sl,"SQL 安全校验与自动纠错","4道防线 + 最多3次自动重试 纠错成功率80%+")
+for i,s in enumerate(["语法校验","权限检查\n(仅SELECT)","表名/字段名\n校验","执行验证"]):
+    x=0.8+i*3.1; box(sl,x,1.7,2.7,1.0,LB,MB,0.12)
+    txt(sl,x+0.1,1.85,2.5,0.7,s,13,DB,True,PP_ALIGN.CENTER)
+    if i<3: txt(sl,x+2.7,2.0,0.4,0.4,">",18,GN,False,PP_ALIGN.CENTER)
+for i,(t,d) in enumerate([("拦截危险操作","DROP/DELETE/UPDATE/INSERT等DML/DDL全部拦截"),
+    ("防幻觉字段","表名/字段名白名单校验不存在的字段自动标记"),("自动纠错","校验失败to错误反馈LLMto重新生成to最多3次"),
+    ("纠错成功率","80%+的错误在3次重试内被自动修复")]):
+    y=3.2+i*0.75; box(sl,0.8,y,11.7,0.6,CB,None,0.06)
+    txt(sl,1.0,y+0.1,4,0.4,t,12,DB,True); txt(sl,5.0,y+0.1,7,0.4,d,10,TX)
+
+# === S9 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,9)
+hdr(sl,"覆盖 20+ 典型财务问数场景","从简单查询到复杂多维分析 AI 一键搞定")
+for i,(t,d) in enumerate([("营收查询","2024年总营收?\n各区域排名?季度趋势?"),("毛利分析","各产品线毛利率排名\n华东区Q2同比变化?"),
+    ("费用管控","预算执行率<80%部门\n费用占比最大类型"),("客户分析","营收Top5客户\n逾期应收最多客户"),
+    ("风险预警","逾期超30天应收\n毛利率下降产品线"),("综合经营","本月经营简报\n利润下降原因分析")]):
+    x=0.5+(i%3)*4.2; y=1.6+(i//3)*2.3; card(sl,x,y,3.8,2.0,t,d)
+
+# === S10 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,10)
+hdr(sl,"系统演示 - 3 个典型场景","实际运行效果 | SQL自动生成+AI解读 | 平均响应3-5秒")
+for i,(t,lns) in enumerate([("场景1:毛利率同比分析",["输入:2024年Q2毛利率同比2023年Q2变化?","SQL:自动生成含CTE跨年对比查询","结果:2024Q2to32.50%|2023Q2to34.60%|down2.10%","AI解读:主因原材料成本up8.3%华南区价格竞争","响应:3.2秒"]),
+    ("场景2:预算执行监控",["输入:哪些部门预算执行率低于80%?","SQL:HAVING子句+三表JOIN聚合","结果:研发中心62.3%|市场部71.5%","AI解读:建议确认研发里程碑评估预算调整","响应:2.8秒"]),
+    ("场景3:应收风险预警",["输入:逾期超30天应收款按客户统计","SQL:多条件过滤+聚合+排序","结果:12个客户逾期总计2,847,000元","AI解读:客户_03逾期680K超90天to立即催收","响应:3.5秒"])]):
+    card(sl,0.5+i*4.2,1.7,3.9,3.2,t,'\n'.join(lns))
+for i,(v,l) in enumerate([("3-5秒","平均响应"),("88%","SQL准确率"),("80%+","纠错成功率"),("20+","问数场景")]):
+    kpi(sl,1.0+i*3.1,5.5,v,l,GN)
+
+# === S11 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,11)
+hdr(sl,"AI vs 传统方案 - 为什么非AI不可?","全方位对比 + 不可替代性论证")
+hd=["对比维度","传统BI方案","AI方案","提升"]; ws=[3.5,3.0,3.0,2.5]
+for j,h in enumerate(hd):
+    x=0.8+sum(ws[:j]); box(sl,x,1.7,ws[j],0.5,DB); txt(sl,x+0.1,1.78,ws[j]-0.2,0.35,h,12,WH,True,PP_ALIGN.CENTER)
+for i,rw in enumerate([["使用方式","写SQL/拖拽配置","自然语言输入","零门槛"],["响应时间","1-3天","3-10秒","99.9%up"],
+    ["问题覆盖率","仅预设模板","开放域/泛化强","无限"],["数据解读","只给数据","数据+分析+建议","质的飞跃"],
+    ["异常发现","人工抽查","AI自动标注","不遗漏"],["部署成本","BI系统+人力","API+开源框架","极低"]]):
+    for j,cell in enumerate(rw):
+        x=0.8+sum(ws[:j]); bg=CB if i%2==0 else WH; box(sl,x,2.2+i*0.48,ws[j],0.48,bg,B2)
+        co=GN if j==3 else (MB if j==2 else TX); txt(sl,x+0.1,2.3+i*0.48,ws[j]-0.2,0.32,cell,10,co,False,PP_ALIGN.CENTER)
+box(sl,0.8,5.3,11.7,1.6,LB,None,0.08)
+mtxt(sl,1.0,5.4,11,1.4,["为什么非AI不可?",
+    "1.自然语言的多样性:同一问题有几十种问法->传统规则无法穷举只有LLM能理解语义",
+    "2.复杂查询的组合性:用户可能问出从未预定义的多维交叉问题->LLM可动态理解并生成SQL",
+    "3.分析解读的专业性:不只给数据像财务分析师一样给出解读->只有LLM具备此能力"],10,DB,Pt(5))
+
+# === S12 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,12)
+hdr(sl,"AI 在方案中的三重角色","不只是工具更是能力增强器")
+for i,(t,d,c) in enumerate([("智能翻译官","自然语言 to SQL\n理解业务术语时间表述维度映射\n华东区毛利率 to SELECT JOIN",MB),
+    ("数据分析师","查询结果 to 经营解读\n发现异常分析原因评估影响\n毛利率下降2.1%主因成本上升",GN),
+    ("质量守门员","自动校验+纠错\n语法检查权限控制字段验证\n失败自动反馈LLM重试最多3次",OG)]):
+    x=0.8+i*4.2; box(sl,x,1.7,3.8,3.2,WH,c,0.15)
+    txt(sl,x+0.3,1.85,3.2,0.5,t,18,c,True); mtxt(sl,x+0.4,2.5,3.0,2.2,d.split('\n'),12,TX,Pt(10))
+txt(sl,3.5,5.4,6,0.5,"AI 让财务人员从取数工升级为分析决策者",15,DB,True,PP_ALIGN.CENTER)
+
+# === S13 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,13)
+hdr(sl,"业务价值 - 定量分析","可量化的效率成本与准确率提升")
+for i,(v,l) in enumerate([("99.9%","问数响应提速"),("88%","SQL生成准确率"),("70%+","BI重复取数减少"),("3-5s","平均响应时间"),("210K","年节省人力成本"),("80%+","纠错成功率")]):
+    kpi(sl,0.5+i*2.1,1.7,v,l)
+box(sl,0.8,3.3,11.7,2.8,CB,B2,0.12); txt(sl,1.1,3.4,11,0.4,"ROI 测算(保守估计)",15,DB,True)
+mtxt(sl,1.1,3.85,11,2.1,["假设:10人管理层每人每月问数5次","",
+    "传统成本:10人x5次/月x2h/次x200元/h = 20,000元/月 -> 240,000元/年",
+    "AI方案成本: LLM API 500元/月 + 运维2,000元/月 = 2,500元/月 -> 30,000元/年","",
+    "年度净节省: 240,000-30,000 = 210,000元    投资回报率(ROI): 700%",
+    "以上不含更快决策带来的间接业务价值"],11,TX,Pt(4))
+
+# === S14 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,14)
+hdr(sl,"业务价值 - 定性维度","超越数字的战略意义")
+for i,(t,d,c) in enumerate([("决策敏捷性","从会上提问会后查数到当场问当场出结果\n决策节奏从月/周级to分钟级",GN),
+    ("数据民主化","每个部门经理都能自助问数不再依赖BI团队\n消除数据垄断释放组织数据活力",MB),
+    ("风险防控前置","月底出报表to实时AI监控预警\n风险发现从事后变为事中/事前",RD),
+    ("知识沉淀","每次AI分析解读都是财务知识的数字化积累\n降低对资深财务分析师的依赖",OG)]):
+    y=1.8+i*1.35; box(sl,0.8,y,11.7,1.15,WH,c,0.12)
+    txt(sl,1.1,y+0.08,3,0.5,t,16,c,True); mtxt(sl,1.1,y+0.55,10.5,0.6,d.split('\n'),12,TX)
+
+# === S15 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,15)
+hdr(sl,"四大创新点","技术创新驱动业务价值")
+for i,(t,d) in enumerate([("五层 Prompt 注入策略","业界首创角色toSchemato规则to示例to问题分层注入准确率提升15个百分点"),
+    ("SQL 自动纠错闭环","语法校验to权限检查to字段验证to执行验证失败自动反馈LLM修正成功率80%+"),
+    ("问数+分析一体化","LLM二次调用自动生成经营分析解读:数据摘要+变动原因+风险提示+行动建议"),
+    ("财务场景深度适配","内置毛利率/净利率/同比环比/预算执行率等专业指标覆盖20+问数模式支持多模型热替换")]):
+    y=1.7+i*1.25; box(sl,0.8,y,11.7,1.05,LB if i%2==0 else CB,None,0.08)
+    txt(sl,1.1,y+0.1,10,0.32,t,15,DB,True); mtxt(sl,1.1,y+0.48,10.5,0.55,d.split('\n'),11,TX)
+
+# === S16 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,16)
+hdr(sl,"不足与展望","正视局限规划未来")
+txt(sl,1.0,1.7,5,0.5,"当前不足",16,RD,True)
+mtxt(sl,1.0,2.2,5.5,2.5,["/复杂多步推理准确率偏低","/模糊问题澄清能力有限","/模拟数据缺乏真实业务验证"],11,TX,Pt(8))
+txt(sl,7.0,1.7,5,0.5,"未来展望",16,GN,True)
+mtxt(sl,7.0,2.2,5.5,4.5,["/Agent模式-多轮追问+自动拆解","/预测能力-接入时序预测模型","/知识库RAG-接入企业财务制度文档","/多模态输出-自动生成PPT简报","/企业级部署-对接ERP/权限管理","/私有化部署-数据不出企业"],11,TX,Pt(8))
+
+# === S17 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,17)
+hdr(sl,"答辩三问 - 标准回答","每组必须清晰回答的三个核心问题")
+for i,(q,a) in enumerate([("1.解决什么财务业务问题?痛点在哪里?",
+    "管理层看数难看数慢-传统问数需1-3天依赖BI团队。三大痛点:1响应慢(天级);2门槛高(需SQL技能);3分析浅(只给数据不解读)。核心矛盾:业务人员懂业务但不懂SQL技术人员懂SQL但不懂业务。"),
+    ("2.AI在你的方案中扮演什么角色?为什么非AI不可?",
+    "三重角色:智能翻译官(自然语言toSQL)+数据分析师(结果to解读)+质量守门员(校验纠错)。非AI不可:1自然语言有无限多样性传统规则无法穷举;2复杂多维交叉查询无法预定义;3只有大模型能结合财务知识给出专业分析解读。"),
+    ("3.你的方案能带来什么业务价值?",
+    "效率:问数从天级to秒级提升99.9%。准确率:SQL生成88%避免人工翻译错误。风控:AI实时监控to异常不遗漏风险发现从事后变事中。ROI:年节省人力成本约210,000元投资回报率700%。定性:决策敏捷性+数据民主化+知识数字化沉淀。")]):
+    y=1.7+i*1.75; box(sl,0.8,y,11.7,1.55,CB,MB,0.08)
+    txt(sl,1.1,y+0.1,11,0.35,q,13,DB,True); mtxt(sl,1.1,y+0.5,11,1.0,a.split('\n'),10,TX,Pt(3))
+
+# === S18 致谢 ===
+sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH)
+box(sl,0,4.5,13.333,3.0,MB)
+oval(sl,1.5,5.5,1.0,1.0,RGBColor(0x3A,0x82,0xF6)); oval(sl,11.5,5.0,0.7,0.7,RGBColor(0x3A,0x82,0xF6))
+txt(sl,2,1.0,9,1.0,"感谢聆听",48,DB,True,PP_ALIGN.CENTER)
+txt(sl,2,2.0,9,0.6,"NL2SQL 财务智能问数系统",20,GR,False,PP_ALIGN.CENTER)
+box(sl,5,2.7,3,0,border=MB)
+txt(sl,2,3.0,9,0.5,"让数据会说话，让决策有依据",15,TX,False,PP_ALIGN.CENTER)
+mtxt(sl,2,5.2,9,1.5,["GitHub: github.com/Jared-Nathan-Su/nlwsql-finance","Streamlit Cloud: nlwsql-finance.streamlit.app","赛道：经营分析  |  AI 工具：DeepSeek-V4","欢迎各位评委老师提问！"],13,WH,Pt(8))
+for p in sl.shapes[-1].text_frame.paragraphs: p.alignment=PP_ALIGN.CENTER
+
+# ===== SAVE =====
+out=os.path.join(os.path.dirname(os.path.dirname(__file__)),"docs","NL2SQL_答辩PPT.pptx")
+prs.save(out)
+print(f"OK: {out} ({len(prs.slides)} slides)")

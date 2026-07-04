@@ -20,7 +20,8 @@ except ImportError:
 from .sql_validator import full_validate, clean_sql
 from .prompt_templates import (
     build_nl2sql_prompt,
-    build_analysis_prompt
+    build_analysis_prompt,
+    build_generic_prompt
 )
 from .db_manager import get_db
 
@@ -69,6 +70,10 @@ class NL2SQLEngine:
         self.model_provider = model_provider
         self.max_retries = max_retries
         self.db = get_db(db_path)
+        
+        # 自定义数据模式
+        self.custom_schema_context = None  # 自定义Schema文本
+        self.custom_table = None           # 自定义表名
         
         # 配置模型
         if model_provider not in self.MODEL_CONFIGS:
@@ -137,8 +142,11 @@ class NL2SQLEngine:
         Returns:
             (是否成功, SQL语句, 错误信息)
         """
-        # Step 1: 构建Prompt并调用LLM
-        prompt = build_nl2sql_prompt(question)
+        # Step 1: 根据模式构建Prompt
+        if self.custom_schema_context and self.custom_table:
+            prompt = build_generic_prompt(question, self.custom_schema_context, self.custom_table)
+        else:
+            prompt = build_nl2sql_prompt(question)
         raw_response = self._call_llm(prompt, temperature=0.1)
         
         if raw_response.startswith("ERROR:"):

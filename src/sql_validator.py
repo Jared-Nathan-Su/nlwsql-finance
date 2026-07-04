@@ -163,6 +163,22 @@ def full_validate(sql: str) -> Tuple[bool, str, str]:
     return True, "", sql
 
 
+# ---- 动态表名白名单管理 ----
+_DEFAULT_TABLES = ALLOWED_TABLES.copy()
+
+
+def add_allowed_tables(tables: List[str]):
+    """向白名单添加自定义表名（用于上传数据场景）"""
+    for t in tables:
+        ALLOWED_TABLES.add(t.lower())
+
+
+def reset_allowed_tables():
+    """恢复白名单为默认表名"""
+    ALLOWED_TABLES.clear()
+    ALLOWED_TABLES.update(_DEFAULT_TABLES)
+
+
 # ============================================================
 # 单元测试
 # ============================================================

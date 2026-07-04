@@ -388,3 +388,58 @@ QUICK_QUESTIONS = {
         "费用率超预算的部门",
     ],
 }
+
+# ============================================================
+# 通用 NL2SQL Prompt 构建器（支持自定义数据）
+# ============================================================
+GENERIC_SYSTEM_ROLE = """你是一位资深的数据分析师，精通SQL语言。
+你的任务是将用户的自然语言问题，转换为准确的SQLite SQL查询语句。
+
+## 你的能力：
+1. 理解数据分析术语（求和、平均、排序、分组、筛选、同比、环比等）
+2. 将模糊的自然语言精确化为SQL查询
+3. 选择合适的聚合函数、JOIN方式、排序和过滤条件
+4. 只生成SELECT查询，绝不生成INSERT/UPDATE/DELETE/DROP等修改语句
+
+## 输出要求：
+- 只输出纯净的SQL语句，不要包含```sql```标记
+- 不要包含任何解释性文字
+- SQL语句以分号结尾
+- 优先使用 English 字段名（如SQL中出现的列名）
+- 如果问题无法回答，输出: UNABLE_TO_ANSWER"""
+
+GENERIC_FEW_SHOT = """
+## 参考示例
+
+用户问题："总共有多少条记录？"
+SQL: SELECT COUNT(*) AS total FROM {table};
+
+用户问题："按{group_col}分组统计{agg_col}的合计"
+SQL: SELECT {group_col}, SUM({agg_col}) AS total FROM {table} GROUP BY {group_col} ORDER BY total DESC;
+
+用户问题："{agg_col}最高的前5条记录"
+SQL: SELECT * FROM {table} ORDER BY {agg_col} DESC LIMIT 5;
+"""
+
+
+def build_generic_prompt(question: str, schema_context: str, table_name: str = "uploaded_data") -> str:
+    """为任意上传数据构建 NL2SQL Prompt"""
+    # 尝试猜测分组列和聚合列
+    prompt = f"""{GENERIC_SYSTEM_ROLE}
+
+{schema_context}
+
+## 业务规则
+1. 时间和日期字段可以直接比较和过滤
+2. 数值字段支持 SUM/AVG/MAX/MIN/COUNT 聚合
+3. 文本字段支持 GROUP BY 分组和 WHERE 筛选
+4. 同比(YoY) = (本期值 - 去年同期值) / 去年同期值 * 100
+5. 使用 ROUND(value, 2) 保留2位小数
+
+{GENERIC_FEW_SHOT.format(table=table_name, group_col="请根据问题选择合适的分组列", agg_col="请根据问题选择合适的数值列")}
+
+## 用户问题
+{question}
+
+请生成SQL："""
+    return prompt
