@@ -108,12 +108,12 @@ txt(sl,1.3,5.65,11,0.5,"我们不替代财务人员，而是在业务与数据�
 sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,5)
 hdr(sl,"系统架构","三层架构: 展示层 to NL2SQL 引擎 to 数据层")
 for i,(t,lns,cl) in enumerate([("展示层 Streamlit",["自然语言输入 | 数据表格 | 可视化图表(Plotly)","SQL展示 | AI分析解读 | 历史查询记录"],MB),
-    ("NL2SQL 核心引擎 LangChain+LLM",["Step1:Prompt构建 Step2:LLM生成SQL Step3:SQL校验","Step4:执行查询 Step5:AI结果解读 自动纠错(最多3次)"],RGBColor(0x3B,0x82,0xF6)),
-    ("数据层 SQLite / 星型模型",["6 维度表 + 5 事实表","销售 | 成本 | 费用(含预算) | 应收 | 应付"],DB)]):
+    ("NL2SQL 核心引擎 LangChain+LLM",["Step1:Prompt构建 Step2:LLM生成SQL Step3:SQL校验","Step4:执行查询 Step5:AI结果解读 自动纠错(最多3次)","多模型支持: DeepSeek-V4 / Qwen / GPT-4o 一键切换"],RGBColor(0x3B,0x82,0xF6)),
+    ("数据层 SQLite / 自定义上传",["6 维度表 + 5 事实表(演示数据)","支持 CSV/Excel 文件上传 自动建表自动分析","销售 | 成本 | 费用(含预算) | 应收 | 应付"],DB)]):
     y=1.8+i*1.6; box(sl,0.8,y,11.7,1.35,cl,None,0.12)
     txt(sl,1.1,y+0.08,11,0.35,t,14,WH,True)
     for j,ln in enumerate(lns): txt(sl,1.1,y+0.48+j*0.32,11,0.3,ln,10,RGBColor(0xE0,0xE8,0xF0))
-for i,(v,l) in enumerate([("12 张","数据表"),("59,720","总记录"),("3 年","时间跨度"),("6 区","覆盖"),("12 线","产品线"),("50个","客户")]):
+for i,(v,l) in enumerate([("12 张","演示数据表"),("59,720","演示总记录"),("3 年","时间跨度"),("6 区","覆盖"),("12 线","产品线"),("任意","上传自定义")]):
     kpi(sl,0.4+i*2.15,6.65,v,l)
 
 # === S6 ===
@@ -157,20 +157,21 @@ for i,(t,d) in enumerate([("拦截危险操作","DROP/DELETE/UPDATE/INSERT等DML
 
 # === S9 ===
 sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,9)
-hdr(sl,"覆盖 20+ 典型财务问数场景","从简单查询到复杂多维分析 AI 一键搞定")
+hdr(sl,"覆盖 20+ 典型财务问数场景","从简单查询到复杂多维分析 + 自定义数据即插即用")
 for i,(t,d) in enumerate([("营收查询","2024年总营收?\n各区域排名?季度趋势?"),("毛利分析","各产品线毛利率排名\n华东区Q2同比变化?"),
     ("费用管控","预算执行率<80%部门\n费用占比最大类型"),("客户分析","营收Top5客户\n逾期应收最多客户"),
-    ("风险预警","逾期超30天应收\n毛利率下降产品线"),("综合经营","本月经营简报\n利润下降原因分析")]):
+    ("风险预警","逾期超30天应收\n毛利率下降产品线"),("自定义数据","上传CSV/Excel即用\n自动建表+智能问数")]):
     x=0.5+(i%3)*4.2; y=1.6+(i//3)*2.3; card(sl,x,y,3.8,2.0,t,d)
 
 # === S10 ===
 sl=prs.slides.add_slide(prs.slide_layouts[6]); solid_bg(sl,WH); ftr(sl); pn(sl,10)
-hdr(sl,"系统演示 - 3 个典型场景","实际运行效果 | SQL自动生成+AI解读 | 平均响应3-5秒")
+hdr(sl,"系统演示 - 4 个典型场景","实际运行效果 | SQL自动生成+AI解读 | 平均响应3-5秒")
 for i,(t,lns) in enumerate([("场景1:毛利率同比分析",["输入:2024年Q2毛利率同比2023年Q2变化?","SQL:自动生成含CTE跨年对比查询","结果:2024Q2to32.50%|2023Q2to34.60%|down2.10%","AI解读:主因原材料成本up8.3%华南区价格竞争","响应:3.2秒"]),
     ("场景2:预算执行监控",["输入:哪些部门预算执行率低于80%?","SQL:HAVING子句+三表JOIN聚合","结果:研发中心62.3%|市场部71.5%","AI解读:建议确认研发里程碑评估预算调整","响应:2.8秒"]),
-    ("场景3:应收风险预警",["输入:逾期超30天应收款按客户统计","SQL:多条件过滤+聚合+排序","结果:12个客户逾期总计2,847,000元","AI解读:客户_03逾期680K超90天to立即催收","响应:3.5秒"])]):
-    card(sl,0.5+i*4.2,1.7,3.9,3.2,t,'\n'.join(lns))
-for i,(v,l) in enumerate([("3-5秒","平均响应"),("88%","SQL准确率"),("80%+","纠错成功率"),("20+","问数场景")]):
+    ("场景3:应收风险预警",["输入:逾期超30天应收款按客户统计","SQL:多条件过滤+聚合+排序","结果:12个客户逾期总计2,847,000元","AI解读:客户_03逾期680K超90天to立即催收","响应:3.5秒"]),
+    ("场景4:自定义数据上传",["上传:拖入CSV/Excel员工表/销售表","自动:建表+Schema生成+快捷问题","提问:员工平均薪资?各部门人数?","AI解读:基于任意上传数据智能分析","响应:4.0秒"])]):
+    card(sl,0.2+i*3.25,1.7,3.0,3.2,t,'\n'.join(lns))
+for i,(v,l) in enumerate([("3-5秒","平均响应"),("88%","SQL准确率"),("80%+","纠错成功率"),("自定义","数据即插即用")]):
     kpi(sl,1.0+i*3.1,5.5,v,l,GN)
 
 # === S11 ===
@@ -220,7 +221,7 @@ for i,(t,d,c) in enumerate([("决策敏捷性","从会上提问会后查数到�
     ("数据民主化","每个部门经理都能自助问数不再依赖BI团队\n消除数据垄断释放组织数据活力",MB),
     ("风险防控前置","月底出报表to实时AI监控预警\n风险发现从事后变为事中/事前",RD),
     ("知识沉淀","每次AI分析解读都是财务知识的数字化积累\n降低对资深财务分析师的依赖",OG)]):
-    y=1.8+i*1.35; box(sl,0.8,y,11.7,1.15,WH,c,0.12)
+    y=1.8+i*1.05; box(sl,0.8,y,11.7,0.9,WH,c,0.12)
     txt(sl,1.1,y+0.08,3,0.5,t,16,c,True); mtxt(sl,1.1,y+0.55,10.5,0.6,d.split('\n'),12,TX)
 
 # === S15 ===
@@ -229,7 +230,8 @@ hdr(sl,"四大创新点","技术创新驱动业务价值")
 for i,(t,d) in enumerate([("五层 Prompt 注入策略","业界首创角色toSchemato规则to示例to问题分层注入准确率提升15个百分点"),
     ("SQL 自动纠错闭环","语法校验to权限检查to字段验证to执行验证失败自动反馈LLM修正成功率80%+"),
     ("问数+分析一体化","LLM二次调用自动生成经营分析解读:数据摘要+变动原因+风险提示+行动建议"),
-    ("财务场景深度适配","内置毛利率/净利率/同比环比/预算执行率等专业指标覆盖20+问数模式支持多模型热替换")]):
+    ("财务场景深度适配","内置毛利率/净利率/同比环比/预算执行率等专业指标覆盖20+问数模式支持多模型热替换"),
+    ("自定义数据即插即用","上传CSV/Excel自动建表动态Schema生成表名白名单注入一键分析任意数据")]):
     y=1.7+i*1.25; box(sl,0.8,y,11.7,1.05,LB if i%2==0 else CB,None,0.08)
     txt(sl,1.1,y+0.1,10,0.32,t,15,DB,True); mtxt(sl,1.1,y+0.48,10.5,0.55,d.split('\n'),11,TX)
 
@@ -261,7 +263,7 @@ txt(sl,2,1.0,9,1.0,"感谢聆听",48,DB,True,PP_ALIGN.CENTER)
 txt(sl,2,2.0,9,0.6,"NL2SQL 财务智能问数系统",20,GR,False,PP_ALIGN.CENTER)
 box(sl,5,2.7,3,0,border=MB)
 txt(sl,2,3.0,9,0.5,"让数据会说话，让决策有依据",15,TX,False,PP_ALIGN.CENTER)
-mtxt(sl,2,5.2,9,1.5,["GitHub: github.com/Jared-Nathan-Su/nlwsql-finance","Streamlit Cloud: nlwsql-finance.streamlit.app","赛道：经营分析  |  AI 工具：DeepSeek-V4","欢迎各位评委老师提问！"],13,WH,Pt(8))
+mtxt(sl,2,5.2,9,1.5,["GitHub: github.com/Jared-Nathan-Su/nlwsql-finance","Streamlit Cloud: nlwsql-finance.streamlit.app","多模型: DeepSeek-V4 / Qwen / GPT-4o","支持: 演示数据 + CSV/Excel自定义上传","欢迎各位评委老师提问！"],13,WH,Pt(8))
 for p in sl.shapes[-1].text_frame.paragraphs: p.alignment=PP_ALIGN.CENTER
 
 # ===== SAVE =====
