@@ -338,12 +338,16 @@ def main():
         
         for i, (cat, questions) in enumerate(quick_categories.items()):
             with quick_cols[i]:
-                with st.popover(cat, use_container_width=True):
-                    for q in questions:
-                        if st.button(q, key=f"quick_{cat}_{q[:10]}", use_container_width=True):
-                            st.session_state.pending_query = q
-                            st.session_state.auto_search = True
-                            st.rerun()
+                # 选中快捷问题后自动关闭 popover
+                if not st.session_state.get("auto_search", False):
+                    with st.popover(cat, use_container_width=True):
+                        for q in questions:
+                            if st.button(q, key=f"quick_{cat}_{q[:10]}", use_container_width=True):
+                                st.session_state.pending_query = q
+                                st.session_state.auto_search = True
+                                st.rerun()
+                else:
+                    st.button(cat, disabled=True, use_container_width=True)
         
         # 随机示例按钮
         if btn_random:
