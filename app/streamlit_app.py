@@ -17,6 +17,7 @@ from src.db_manager import DatabaseManager, get_db
 from src.nl2sql_engine import NL2SQLEngine, create_engine
 from src.analysis_agent import AnalysisAgent
 from src.prompt_templates import SAMPLE_QUESTIONS, QUICK_QUESTIONS
+from src.sql_validator import add_allowed_tables, reset_allowed_tables
 
 # ===================== 页面配置 =====================
 st.set_page_config(
@@ -632,13 +633,11 @@ def process_query(question: str, model_option: str, api_key: str):
     # 自定义数据模式：注入所有表的Schema + 注册表名白名单
     if st.session_state.get("use_custom_data", False) and st.session_state.get("custom_tables"):
         db_ctx = init_db()
-        from src.sql_validator import add_allowed_tables, reset_allowed_tables
         reset_allowed_tables()
         add_allowed_tables(st.session_state.custom_tables)
         engine.custom_schema_context = db_ctx.generate_schema_context(st.session_state.custom_tables)
         engine.custom_table = st.session_state.custom_tables[0]
     else:
-        from src.sql_validator import reset_allowed_tables
         reset_allowed_tables()
         engine.custom_schema_context = None
         engine.custom_table = None
